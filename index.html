@@ -1230,37 +1230,49 @@
       document.getElementById("closing-message").textContent = message;
 
       // Submit score to realtime leaderboard
-      if (socket && socket.connected) {
-        socket.emit("submit-score", { username: currentUsername, score: score });
-      }
+      submitScore(currentUsername, score);
 
       showScreen(resultScreen);
     }
 
     let currentUsername = "";
 
-    // Socket.io initialization
-    const socketUrl = window.location.origin.includes("localhost") || window.location.origin.includes("127.0.0.1")
-      ? window.location.origin
-      : "http://localhost:3000";
+    // API endpoint auto-detection
+    // If opened via file://, fall back to the Vercel deployed endpoint.
+    // If opened on localhost, relative path '/api/leaderboard' works (using local server.js routes).
+    // If opened on Vercel, relative path '/api/leaderboard' routes to the Serverless Neon Postgres handler.
+    const apiUrl = window.location.protocol === "file:"
+      ? "https://belajar-bice-ten.vercel.app/api/leaderboard"
+      : "/api/leaderboard";
 
-    let socket;
-    try {
-      socket = io(socketUrl);
+    async function fetchLeaderboard() {
+      try {
+        const response = await fetch(apiUrl);
+        if (response.ok) {
+          const leaderboard = await response.json();
+          updateLeaderboardUI(leaderboard);
+        }
+      } catch (e) {
+        console.warn("Gagal mengambil data leaderboard dari API:", e);
+      }
+    }
 
-      socket.on("connect", () => {
-        console.log("Terhubung ke server arsip leaderboard!");
-      });
-
-      socket.on("leaderboard-update", (leaderboard) => {
-        updateLeaderboardUI(leaderboard);
-      });
-
-      socket.on("connect_error", () => {
-        console.warn("Gagal terhubung ke server realtime leaderboard. Menjalankan mode lokal.");
-      });
-    } catch (e) {
-      console.warn("Library Socket.io tidak dapat dimuat. Menjalankan mode lokal.");
+    async function submitScore(username, score) {
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, score })
+        });
+        if (response.ok) {
+          const leaderboard = await response.json();
+          updateLeaderboardUI(leaderboard);
+        }
+      } catch (e) {
+        console.warn("Gagal mengirimkan skor ke API:", e);
+      }
     }
 
     function updateLeaderboardUI(leaderboard) {
@@ -1369,6 +1381,12 @@
         document.getElementById("username-input").value = savedUsername;
         currentUsername = savedUsername; // set active username if pre-filled
       }
+
+      // Initial leaderboard fetch
+      fetchLeaderboard();
+
+      // Poll leaderboard updates every 10 seconds for real-time feel
+      setInterval(fetchLeaderboard, 10000);
     });
   </script>
  

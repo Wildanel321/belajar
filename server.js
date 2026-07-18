@@ -20,6 +20,47 @@ const SCORES_FILE = path.join(__dirname, 'scores.json');
 
 // Serve static files from the workspace directory
 app.use(express.static(__dirname));
+app.use(express.json());
+
+// Local API routes (mirrors serverless functions for local testing)
+app.get('/api/leaderboard', (req, res) => {
+  res.json(readScores());
+});
+
+app.post('/api/leaderboard', (req, res) => {
+  const { username, score } = req.body;
+  if (!username || typeof score !== 'number') {
+    return res.status(400).json({ error: 'Username and score required' });
+  }
+
+  const trimmedUsername = username.trim().substring(0, 20);
+  if (!trimmedUsername) return res.status(400).json({ error: 'Invalid username' });
+
+  let scores = readScores();
+  const existingIndex = scores.findIndex(s => s.username.toLowerCase() === trimmedUsername.toLowerCase());
+
+  if (existingIndex !== -1) {
+    if (score > scores[existingIndex].score) {
+      scores[existingIndex].score = score;
+      scores[existingIndex].date = new Date().toLocaleDateString('id-ID');
+    }
+  } else {
+    scores.push({
+      username: trimmedUsername,
+      score: score,
+      date: new Date().toLocaleDateString('id-ID')
+    });
+  }
+
+  scores.sort((a, b) => b.score - a.score);
+  scores = scores.slice(0, 10);
+  writeScores(scores);
+
+  // Sync to socket.io client if connected
+  io.emit('leaderboard-update', scores);
+
+  res.json(scores);
+});
 
 // Default mock scores for thematic vintage look
 const defaultScores = [
