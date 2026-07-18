@@ -1,0 +1,1375 @@
+<!doctype html>
+<html lang="id"><head><script>window["__codeletBootstrap__"]=JSON.parse('{"A":"A","B":"20260717-05-8209e4e"}');</script><script src="/_sdk/f432b76fb310b513.telemetry_sdk.js" integrity="sha512-9FJQ55EKmmqhyyik8BhrMVfm0+iYYfb8uOlRsjtkxJMEI97qOVEI4PnHohDjQAtvAep0IOEpdQ64eki0sz62ug=="></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kuis Ibu Kota &amp; Sejarah Dunia</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&amp;family=Playfair+Display:wght@700;800;900&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #2d332d;
+      --teal: #356d6b;
+      --teal-deep: #1d4a49;
+      --paper: #f7e8bd;
+      --paper-deep: #d9bf8f;
+      --rust: #a34732;
+      --gold: #c38b3d;
+      --line: rgba(66, 51, 31, .34);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      width: 100%;
+      min-height: calc(100 * min(var(--vh, 1vh), 1vh));
+      font-family: "Libre Baskerville", serif;
+      color: var(--ink);
+    }
+
+    button { font-family: inherit; }
+
+    button:focus-visible {
+      outline: 3px solid #173a39;
+      outline-offset: 4px;
+    }
+
+    .poster-shell {
+      position: relative;
+      width: 100%;
+      min-height: calc(100 * min(var(--vh, 1vh), 1vh));
+      overflow: hidden;
+      padding: 24px;
+      background:
+        linear-gradient(rgba(50, 91, 87, .11) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(50, 91, 87, .11) 1px, transparent 1px),
+        radial-gradient(circle at 50% 0%, rgba(255,249,221,.8), transparent 43%),
+        url("https://images.pexels.com/photos/592753/pexels-photo-592753.jpeg?auto=compress&cs=tinysrgb&w=1920");
+      background-size: 45px 45px, 45px 45px, auto, cover;
+      background-blend-mode: multiply, multiply, screen, soft-light;
+    }
+
+    .poster-shell::before,
+    .poster-shell::after {
+      content: "";
+      position: absolute;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .poster-shell::before {
+      inset: 12px;
+      border: 2px solid rgba(40, 75, 70, .46);
+      box-shadow: inset 0 0 0 8px rgba(131, 82, 39, .08), inset 0 0 30px rgba(76, 42, 18, .26);
+    }
+
+    .poster-shell::after {
+      inset: 22px;
+      border: 1px dashed rgba(145, 71, 45, .48);
+      transform: rotate(-.35deg);
+    }
+
+    .main-frame {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 1110px;
+      margin: 0 auto;
+    }
+
+    .masthead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 4px 4px 20px;
+      color: var(--teal-deep);
+    }
+
+    .masthead-mark {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: "Space Mono", monospace;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .compass-mini {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border: 2px solid var(--teal-deep);
+      border-radius: 999px;
+    }
+
+    .route-label,
+    .metadata {
+      color: var(--teal-deep);
+      font-family: "Space Mono", monospace;
+      font-size: .72rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .paper-panel {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(65, 53, 33, .4);
+      background:
+        repeating-linear-gradient(0deg, rgba(91,64,38,.045) 0, rgba(91,64,38,.045) 1px, transparent 1px, transparent 4px),
+        linear-gradient(145deg, rgba(255,247,211,.9), rgba(231,206,154,.95));
+      box-shadow: 8px 9px 0 rgba(92, 58, 28, .17), 0 20px 42px rgba(66, 47, 24, .22);
+    }
+
+    .paper-panel::after {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border: 1px solid rgba(52, 83, 79, .24);
+      pointer-events: none;
+    }
+
+    .screen {
+      display: none;
+      animation: reveal .45s ease both;
+    }
+
+    .screen.active { display: block; }
+
+    @keyframes reveal {
+      from { opacity: 0; transform: translateY(10px) rotate(-.15deg); }
+      to { opacity: 1; transform: translateY(0) rotate(0); }
+    }
+
+    .travel-title {
+      margin: 0;
+      color: var(--teal-deep);
+      font-family: "Playfair Display", serif;
+      line-height: .93;
+      letter-spacing: -.045em;
+      text-transform: uppercase;
+      text-shadow: 2px 2px 0 rgba(188, 140, 67, .27);
+    }
+
+    .stamp {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 2px dashed var(--rust);
+      padding: 8px 11px;
+      color: var(--rust);
+      background: rgba(247, 223, 178, .52);
+      font-family: "Space Mono", monospace;
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      transform: rotate(-4deg);
+    }
+
+    .hero-grid {
+      display: grid;
+      min-height: 520px;
+      grid-template-columns: 1.1fr .9fr;
+    }
+
+    .hero-copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(30px, 6vw, 70px);
+    }
+
+    .hero-art {
+      position: relative;
+      display: flex;
+      min-height: 320px;
+      align-items: flex-end;
+      justify-content: center;
+      overflow: hidden;
+      padding: 36px;
+      border-left: 1px solid rgba(60, 49, 31, .38);
+      background:
+        linear-gradient(180deg, rgba(50,105,102,.25), rgba(26,69,68,.75)),
+        url("https://images.pexels.com/photos/9494903/pexels-photo-9494903.jpeg?auto=compress&cs=tinysrgb&w=1280");
+      background-position: center;
+      background-size: cover;
+    }
+
+    .hero-art::before {
+      content: "";
+      position: absolute;
+      top: 42px;
+      right: -56px;
+      width: 260px;
+      height: 260px;
+      border: 6px double rgba(241, 218, 166, .88);
+      border-radius: 50%;
+      box-shadow: 0 0 0 22px rgba(241, 218, 166, .12);
+    }
+
+    .hero-art::after {
+      content: "✦  N  ✦";
+      position: absolute;
+      top: 92px;
+      right: 29px;
+      color: #f1dba9;
+      font-family: "Playfair Display", serif;
+      font-size: 1.1rem;
+      letter-spacing: .22em;
+    }
+
+    .compass-large {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      width: 210px;
+      height: 210px;
+      place-items: center;
+      border: 3px solid rgba(243,223,170,.95);
+      border-radius: 50%;
+      color: #f7e4b5;
+      box-shadow: 0 0 0 12px rgba(245,220,163,.13);
+    }
+
+    .compass-large::before,
+    .compass-large::after {
+      content: "";
+      position: absolute;
+      background: rgba(243,223,170,.87);
+    }
+
+    .compass-large::before { width: 2px; height: 184px; }
+    .compass-large::after { width: 184px; height: 2px; }
+
+    .compass-star {
+      position: relative;
+      width: 0;
+      height: 0;
+      border-right: 27px solid transparent;
+      border-bottom: 82px solid rgba(243,223,170,.93);
+      border-left: 27px solid transparent;
+      transform: rotate(45deg);
+    }
+
+    .compass-star::after {
+      content: "";
+      position: absolute;
+      top: 35px;
+      left: -27px;
+      border-top: 82px solid rgba(165, 68, 47, .9);
+      border-right: 27px solid transparent;
+      border-left: 27px solid transparent;
+    }
+
+    .poster-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: 2px solid rgba(27, 59, 57, .9);
+      padding: 14px 18px;
+      color: #f7e8bd;
+      font-family: "Space Mono", monospace;
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 4px 5px 0 rgba(92, 49, 29, .35);
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+
+    .poster-button:hover {
+      filter: saturate(1.12);
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 7px 0 rgba(92, 49, 29, .3);
+    }
+
+    .poster-button:disabled {
+      cursor: not-allowed;
+      opacity: .55;
+      transform: none;
+      box-shadow: 2px 2px 0 rgba(92, 49, 29, .22);
+    }
+
+    .hint-button {
+      border-color: rgba(163, 71, 50, .88);
+      color: #fff1c5;
+      background: var(--rust);
+    }
+
+    .quiz-panel { padding: clamp(22px, 4vw, 42px); }
+
+    .quiz-topline {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(96px, 1fr));
+      gap: 8px;
+      width: min(100%, 410px);
+    }
+
+    .score-badge {
+      padding: 8px 10px;
+      border: 1px solid rgba(120, 63, 40, .55);
+      color: var(--rust);
+      background: rgba(255,245,206,.45);
+      font-family: "Space Mono", monospace;
+      font-size: .65rem;
+      font-weight: 700;
+      line-height: 1.35;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .quiz-layout {
+      display: grid;
+      align-items: stretch;
+      gap: 28px;
+      grid-template-columns: .72fr 1.28fr;
+    }
+
+    .destination-card {
+      position: relative;
+      min-height: 365px;
+      overflow: hidden;
+      padding: 24px;
+      border: 2px solid rgba(37, 67, 64, .7);
+      color: #f5e7be;
+      background:
+        linear-gradient(150deg, rgba(34, 76, 74, .94), rgba(52, 109, 107, .77)),
+        url("https://images.pexels.com/photos/20067918/pexels-photo-20067918.jpeg?auto=compress&cs=tinysrgb&w=800");
+      background-position: center;
+      background-size: cover;
+      box-shadow: inset 0 0 0 5px rgba(247,227,178,.19);
+    }
+
+    .destination-card::before {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border: 1px dashed rgba(246,226,181,.68);
+    }
+
+    .place-code {
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      font-family: "Space Mono", monospace;
+      font-size: .72rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    .ticket-stamp {
+      position: absolute;
+      top: 64px;
+      right: 18px;
+      z-index: 1;
+      display: grid;
+      width: 76px;
+      height: 76px;
+      place-items: center;
+      border: 2px dashed rgba(246,226,181,.74);
+      border-radius: 50%;
+      font-family: "Space Mono", monospace;
+      font-size: .62rem;
+      letter-spacing: .06em;
+      text-align: center;
+      transform: rotate(14deg);
+    }
+
+    .route-path {
+      position: absolute;
+      top: 116px;
+      left: 26px;
+      width: 72%;
+      height: 90px;
+      border-top: 2px dashed rgba(245,231,190,.8);
+      border-radius: 50%;
+      transform: rotate(-14deg);
+    }
+
+    .route-path::before,
+    .route-path::after {
+      content: "";
+      position: absolute;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #f3ddab;
+    }
+
+    .route-path::before { top: -5px; left: 0; }
+    .route-path::after { right: 0; bottom: -5px; }
+
+    .timeline-card {
+      position: absolute;
+      right: 24px;
+      bottom: 22px;
+      left: 24px;
+      z-index: 1;
+      padding: 14px;
+      border: 1px solid rgba(246,226,181,.7);
+      background: rgba(24, 58, 56, .62);
+    }
+
+    .timeline-card p {
+      margin: 0;
+      font-family: "Space Mono", monospace;
+      font-size: .67rem;
+      line-height: 1.55;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .timeline-line {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      margin-top: 10px;
+    }
+
+    .timeline-line span {
+      height: 4px;
+      background: rgba(247, 226, 181, .72);
+    }
+
+    .question-heading {
+      margin: 0 0 20px;
+      color: var(--teal-deep);
+      font-family: "Playfair Display", serif;
+      font-weight: 900;
+      line-height: 1.12;
+    }
+
+    .answer-list {
+      display: grid;
+      gap: 11px;
+    }
+
+    .answer-button {
+      display: grid;
+      width: 100%;
+      align-items: center;
+      grid-template-columns: 39px 1fr;
+      padding: 12px 14px;
+      border: 1px solid rgba(74, 58, 37, .42);
+      color: #312c23;
+      background: rgba(255,247,216,.57);
+      text-align: left;
+      cursor: pointer;
+      transition: transform .16s ease, background .16s ease, border-color .16s ease;
+    }
+
+    .answer-button:hover:not(:disabled) {
+      border-color: var(--teal);
+      background: rgba(246,224,168,.82);
+      transform: translateX(4px);
+    }
+
+    .answer-button:disabled { cursor: default; }
+
+    .choice-index {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border: 1px solid var(--teal);
+      border-radius: 50%;
+      color: var(--teal-deep);
+      font-family: "Space Mono", monospace;
+      font-size: .74rem;
+      font-weight: 700;
+    }
+
+    .answer-button.correct {
+      border-color: #2e6d59;
+      background: rgba(91, 137, 111, .34);
+    }
+
+    .answer-button.incorrect {
+      border-color: var(--rust);
+      background: rgba(174, 70, 49, .24);
+    }
+
+    .hint-box {
+      display: none;
+      margin-top: 16px;
+      padding: 13px 15px;
+      border-left: 4px solid var(--rust);
+      color: #4a3926;
+      background: rgba(201, 139, 61, .16);
+      font-size: .9rem;
+      line-height: 1.55;
+    }
+
+    .hint-box.active { display: block; }
+
+    .feedback-row {
+      display: flex;
+      min-height: 70px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 18px;
+      padding-top: 17px;
+      border-top: 1px solid var(--line);
+    }
+
+    .feedback {
+      margin: 0;
+      color: #51422c;
+      font-size: .92rem;
+      line-height: 1.5;
+    }
+
+    .feedback strong {
+      color: var(--teal-deep);
+      font-family: "Playfair Display", serif;
+      font-size: 1.12rem;
+    }
+
+    .feedback.wrong strong { color: var(--rust); }
+
+    .result-panel {
+      max-width: 790px;
+      margin: 0 auto;
+      padding: clamp(34px, 6vw, 70px);
+      text-align: center;
+    }
+
+    .result-score {
+      display: flex;
+      width: min(220px, 55vw);
+      aspect-ratio: 1;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 28px auto 23px;
+      border: 7px double var(--teal-deep);
+      border-radius: 50%;
+      color: var(--teal-deep);
+      background: rgba(255,247,213,.45);
+      box-shadow: 0 0 0 10px rgba(172, 91, 51, .12);
+    }
+
+    .result-score .big {
+      font-family: "Playfair Display", serif;
+      font-size: clamp(3rem, 8vw, 5rem);
+      line-height: .9;
+    }
+
+    .result-score .small {
+      margin-top: 9px;
+      font-family: "Space Mono", monospace;
+      font-size: .72rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 28px auto 22px;
+      text-align: left;
+    }
+
+    .summary-card {
+      padding: 15px;
+      border: 1px solid rgba(74, 58, 37, .38);
+      background: rgba(255, 247, 216, .48);
+    }
+
+    .summary-card span {
+      display: block;
+      color: var(--rust);
+      font-family: "Space Mono", monospace;
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .summary-card strong {
+      display: block;
+      margin-top: 7px;
+      color: var(--teal-deep);
+      font-family: "Playfair Display", serif;
+      font-size: 1.6rem;
+    }
+
+    .score-explanation {
+      margin: 0 auto 24px;
+      padding: 15px;
+      border: 1px dashed rgba(163, 71, 50, .6);
+      color: #51422c;
+      background: rgba(247, 223, 178, .4);
+      font-size: .89rem;
+      line-height: 1.65;
+    }
+
+    .closing-message {
+      max-width: 560px;
+      margin: 0 auto 27px;
+      color: #51422c;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 760px) {
+      .poster-shell { padding: 14px; }
+      .poster-shell::before { inset: 6px; }
+      .poster-shell::after { inset: 13px; }
+      .hero-grid, .quiz-layout { grid-template-columns: 1fr; }
+      .hero-art {
+        min-height: 270px;
+        border-top: 1px solid rgba(60,49,31,.38);
+        border-left: 0;
+      }
+      .masthead { padding-bottom: 14px; }
+      .route-label { display: none; }
+      .quiz-topline,
+      .feedback-row { flex-direction: column; }
+      .score-grid { width: 100%; }
+      .poster-button { width: 100%; }
+      .summary-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+  <script src="/_sdk/e3937a0574eb2d69.data_sdk.js" type="text/javascript" integrity="sha512-xbp/ACqEQy1aDxYMtXTrR3y5MUbzxuggRR/9sD48Gl4VhLMMCiAHsxMaFV6DTdeBpR6ymF+t2zhPKYkWM3+Jfw=="></script>
+  <script src="/_sdk/9432170dbd2ae0df.resizing_sdk.js" type="text/javascript" integrity="sha512-FeT+58sb1f9ejWPWFjCbJvTT+SDwGV+ngrHUnlO7TWEOoqwOLj6p256kO3vOL7DIWl1cIgrobiof8v2bOigwPg=="></script>
+ </head>
+ <body data-template-id="__page-root" style="background: linear-gradient(135deg, rgb(240, 219, 171), rgb(201, 174, 120));">
+  <div class="poster-shell">
+   <header class="main-frame masthead">
+    <div class="masthead-mark"><span class="compass-mini"><i data-lucide="compass" style="width:20px;height:20px"></i></span> <span data-template-id="masthead-title" class="canva-text" style="color: rgb(29, 74, 73); font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.08rem;">Atlas &amp; Arsip Dunia</span>
+    </div>
+    <p data-template-id="masthead-route" class="canva-text route-label" style="color: rgb(53, 109, 107); font-weight: 700; font-style: normal; font-size: 11px; letter-spacing: 0.06rem;">Rute pengetahuan · ibu kota &amp; jaman kolonial</p>
+   </header>
+   <main class="main-frame">
+    <section id="start-screen" class="screen active" aria-labelledby="quiz-title">
+     <div data-template-id="start-panel" class="canva-panel paper-panel hero-grid" style="background: linear-gradient(145deg, rgb(255, 242, 201), rgb(223, 193, 139));">
+      <div class="hero-copy"><span data-template-id="start-stamp" class="canva-tag stamp" style="background: rgba(247, 223, 178, 0.48); color: rgb(163, 71, 50); font-weight: 700; font-style: normal; font-size: 11px; letter-spacing: 0.04rem;">Atlas &amp; Arsip</span>
+       <h1 id="quiz-title" data-template-id="quiz-title" class="canva-text travel-title mt-7" style="color: rgb(29, 74, 73); font-weight: 900; font-style: normal; font-size: 36px; letter-spacing: -0.04rem; line-height: 0.95;">Kuis Ibu Kota &amp; Sejarah Dunia</h1>
+       <p data-template-id="start-intro" class="canva-text mt-6 max-w-xl leading-7" style="color: rgb(81, 66, 44); font-weight: 700; font-style: normal; font-size: 17px; line-height: 1.55;">Buka atlas dan arsip sejarah. Jelajahi lebih dari 100 pertanyaan acak tentang ibu kota dunia serta jejak VOC, Hindia Belanda, perlawanan rakyat, dan kebangkitan nasional.</p>
+       
+       <div class="mt-6 max-w-md">
+        <label for="username-input" class="block text-xs font-bold uppercase tracking-wider text-[#1d4a49] mb-2 font-mono">Daftar Nama Penjelajah (Arsip Papan Peringkat)</label>
+        <input id="username-input" type="text" placeholder="Masukkan nama Anda..." class="w-full px-4 py-3 border border-[#4a3a25] bg-[#fffbf0] text-[#2d332d] font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[#1d4a49] placeholder:text-[#9c8b73]" style="background-color: rgba(255, 247, 216, 0.57);" />
+        <p id="login-error-msg" class="text-xs text-red-750 font-bold mt-1 hidden font-mono">NAMA HARUS DIISI UNTUK MENDAFTAR PADA ARSIP!</p>
+       </div>
+
+       <div class="mt-8 flex flex-wrap gap-3 items-center"><button id="start-button" type="button" data-template-id="start-button" class="canva-button poster-button" style="background: rgb(29, 74, 73); color: rgb(247, 232, 189); font-weight: 700; font-style: normal; font-size: 14px; letter-spacing: 0.03rem;">Mulai Ekspedisi</button> <span data-template-id="start-note" class="canva-text text-sm italic text-[#69573c]" style="color: rgb(105, 87, 60); font-weight: 700; font-style: italic; font-size: 14px;">199 pertanyaan · benar +10, salah -4 · hint -10 poin</span>
+       </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+       <div class="compass-large">
+        <div class="compass-star"></div>
+       </div>
+      </div>
+     </div>
+
+     <!-- Leaderboard in start screen -->
+     <div class="canva-panel paper-panel mt-6 p-6 sm:p-8" style="background: linear-gradient(145deg, rgb(255, 242, 201), rgb(223, 193, 139));">
+      <div class="flex items-center gap-3 border-b border-[#42331f]/30 pb-4 mb-4">
+       <i data-lucide="trophy" class="text-[#a34732] w-6 h-6"></i>
+       <h2 class="text-lg font-bold uppercase tracking-wider text-[#1d4a49] font-mono">Arsip Peringkat Teratas (Realtime)</h2>
+      </div>
+      <div class="overflow-x-auto">
+       <table class="w-full text-left font-mono text-xs sm:text-sm">
+        <thead>
+         <tr class="border-b border-[#42331f]/20 text-[#a34732]">
+          <th class="py-2 px-3">Peringkat</th>
+          <th class="py-2 px-3">Penjelajah</th>
+          <th class="py-2 px-3 text-right">Skor Terbaik</th>
+          <th class="py-2 px-3 text-right">Tanggal Ekspedisi</th>
+         </tr>
+        </thead>
+        <tbody id="leaderboard-body-start">
+         <!-- Loaded dynamically -->
+        </tbody>
+       </table>
+       <div id="leaderboard-empty-start" class="text-center py-6 text-sm text-[#69573c] italic">
+        Belum ada catatan ekspedisi... Jadilah yang pertama!
+       </div>
+      </div>
+     </div>
+    </section>
+    <section id="quiz-screen" class="screen" aria-labelledby="question-text">
+     <div data-template-id="quiz-panel" class="canva-panel paper-panel quiz-panel" style="background: linear-gradient(145deg, rgb(255, 242, 201), rgb(223, 193, 139));">
+      <div class="quiz-topline">
+       <div>
+        <p data-template-id="question-label" class="canva-text metadata mb-2" style="color: rgb(29, 74, 73); font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.06rem;">Tantangan Atlas &amp; Arsip</p>
+        <p id="category-text" class="metadata mb-2"></p>
+        <p id="progress-text" class="metadata" aria-live="polite"></p>
+       </div>
+       <div class="score-grid" aria-live="polite">
+        <div id="score-text" class="score-badge"></div>
+        <div id="hint-count-text" class="score-badge"></div>
+        <div id="hint-penalty-text" class="score-badge"></div>
+       </div>
+      </div>
+      <div class="quiz-layout">
+       <aside class="destination-card" aria-label="Kartu arsip dan perjalanan vintage">
+        <p data-template-id="destination-label" class="canva-text place-code" style="color: rgb(245, 231, 190); font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.1rem;">Kartu Penjelajah</p>
+        <div class="ticket-stamp">
+         ARCHIVE<br>
+         POST
+        </div>
+        <div class="route-path"></div>
+        <div class="timeline-card">
+         <p id="archive-topic">ATLAS • RIWAYAT • PENJELAJAHAN</p>
+         <div class="timeline-line">
+          <span></span><span></span><span></span><span></span>
+         </div>
+         <p class="mt-3">Catatan pengetahuan untuk ekspedisi berikutnya.</p>
+        </div>
+       </aside>
+       <div>
+        <h2 id="question-text" class="question-heading"></h2>
+        <div id="answer-list" class="answer-list" role="group" aria-label="Pilihan jawaban"></div>
+        <div id="hint-box" class="hint-box" aria-live="polite"></div>
+        <div class="feedback-row">
+         <p id="feedback-text" class="feedback" aria-live="polite"></p>
+         <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto"><button id="hint-button" type="button" data-template-id="hint-button" class="canva-button poster-button hint-button" style="background: rgb(163, 71, 50); color: rgb(255, 241, 197); font-weight: 700; font-style: normal; font-size: 13px; letter-spacing: 0.02rem;">Buka Hint · -10</button> <button id="next-button" type="button" data-template-id="next-button" class="canva-button poster-button hidden" disabled="" style="background: rgb(29, 74, 73); color: rgb(247, 232, 189); font-weight: 700; font-style: normal; font-size: 13px; letter-spacing: 0.02rem;">Lanjut Rute</button>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </section>
+    <section id="result-screen" class="screen" aria-labelledby="result-title">
+     <div data-template-id="result-panel" class="canva-panel paper-panel result-panel" style="background: linear-gradient(145deg, rgb(255, 242, 201), rgb(223, 193, 139));"><span data-template-id="result-stamp" class="canva-tag stamp" style="background: rgba(247, 223, 178, 0.48); color: rgb(163, 71, 50); font-weight: 700; font-style: normal; font-size: 11px; letter-spacing: 0.04rem;">Ekspedisi Selesai</span>
+      <h2 id="result-title" data-template-id="result-title" class="canva-text travel-title mt-7" style="color: rgb(29, 74, 73); font-weight: 900; font-style: normal; font-size: 27px; letter-spacing: -0.04rem; line-height: 0.95;">Catatan Ekspedisi</h2>
+      <div class="result-score" aria-live="polite"><span id="final-score" class="big"></span> <span id="final-caption" class="small"></span>
+      </div>
+      <p id="result-percentage" class="metadata mb-4"></p>
+      <div class="summary-grid" aria-label="Ringkasan hasil kuis">
+       <div class="summary-card">
+        <span>Benar</span><strong id="correct-total">0</strong>
+       </div>
+       <div class="summary-card">
+        <span>Salah</span><strong id="wrong-total">0</strong>
+       </div>
+       <div class="summary-card">
+        <span>Hint dipakai</span><strong id="hint-total">0</strong>
+       </div>
+       <div class="summary-card">
+        <span>Poin hilang dari hint</span><strong id="penalty-total">0</strong>
+       </div>
+      </div>
+      <p id="score-explanation" class="score-explanation"></p>
+      <p id="closing-message" class="closing-message"></p><button id="replay-button" type="button" data-template-id="replay-button" class="canva-button poster-button" style="background: rgb(29, 74, 73); color: rgb(247, 232, 189); font-weight: 700; font-style: normal; font-size: 14px; letter-spacing: 0.03rem;">Jelajah Lagi</button>
+     </div>
+
+     <!-- Leaderboard in result screen -->
+     <div class="canva-panel paper-panel mt-6 p-6 sm:p-8" style="background: linear-gradient(145deg, rgb(255, 242, 201), rgb(223, 193, 139));">
+      <div class="flex items-center gap-3 border-b border-[#42331f]/30 pb-4 mb-4">
+       <i data-lucide="trophy" class="text-[#a34732] w-6 h-6"></i>
+       <h2 class="text-lg font-bold uppercase tracking-wider text-[#1d4a49] font-mono">Arsip Peringkat Teratas (Realtime)</h2>
+      </div>
+      <div class="overflow-x-auto">
+       <table class="w-full text-left font-mono text-xs sm:text-sm">
+        <thead>
+         <tr class="border-b border-[#42331f]/20 text-[#a34732]">
+          <th class="py-2 px-3">Peringkat</th>
+          <th class="py-2 px-3">Penjelajah</th>
+          <th class="py-2 px-3 text-right">Skor Terbaik</th>
+          <th class="py-2 px-3 text-right">Tanggal Ekspedisi</th>
+         </tr>
+        </thead>
+        <tbody id="leaderboard-body-result">
+         <!-- Loaded dynamically -->
+        </tbody>
+       </table>
+       <div id="leaderboard-empty-result" class="text-center py-6 text-sm text-[#69573c] italic">
+        Belum ada catatan ekspedisi... Jadilah yang pertama!
+       </div>
+      </div>
+     </div>
+    </section>
+   </main>
+  </div>
+  <script src="/_sdk/b7bbbe551ba4f8f5.editing_sdk.js" integrity="sha512-h06pMz6KcVo4Wjvoggb4sS5DZpb55bTriAzBmA0YwbkBA3z2ZXl8CBEbCWT+/fAsm0SwDejJ7jJHOZsLZKqPoQ=="></script>
+  <script>
+    const capitalQuestions = [
+      ["Indonesia", "Jakarta", ["Jakarta", "Bandung", "Surabaya", "Medan"], "Pusat pemerintahan Indonesia saat ini berada di Pulau Jawa."],
+      ["Jepang", "Tokyo", ["Kyoto", "Tokyo", "Osaka", "Nagoya"], "Kota ini berada di kawasan Kanto."],
+      ["Tiongkok", "Beijing", ["Shanghai", "Beijing", "Hong Kong", "Guangzhou"], "Namanya berarti 'Ibu Kota Utara'."],
+      ["India", "New Delhi", ["Mumbai", "Kolkata", "New Delhi", "Chennai"], "Kota ini merupakan bagian dari wilayah metropolitan Delhi."],
+      ["Thailand", "Bangkok", ["Phuket", "Bangkok", "Chiang Mai", "Pattaya"], "Kota ini berada di tepi Sungai Chao Phraya."],
+      ["Vietnam", "Hanoi", ["Ho Chi Minh City", "Da Nang", "Hanoi", "Hue"], "Kota ini berada di Vietnam utara."],
+      ["Korea Selatan", "Seoul", ["Busan", "Seoul", "Incheon", "Daegu"], "Sungai Han melintasi kota ini."],
+      ["Mongolia", "Ulaanbaatar", ["Ulaanbaatar", "Erdenet", "Darkhan", "Khovd"], "Ini adalah salah satu ibu kota terdingin di dunia."],
+      ["Australia", "Canberra", ["Sydney", "Melbourne", "Canberra", "Perth"], "Kota ini dipilih sebagai kompromi antara Sydney dan Melbourne."],
+      ["Selandia Baru", "Wellington", ["Auckland", "Christchurch", "Wellington", "Dunedin"], "Terletak di ujung selatan Pulau Utara."],
+      ["Fiji", "Suva", ["Nadi", "Lautoka", "Suva", "Levuka"], "Berada di pulau Viti Levu."],
+      ["Papua Nugini", "Port Moresby", ["Lae", "Madang", "Port Moresby", "Rabaul"], "Terletak di pesisir selatan pulau New Guinea."],
+      ["Prancis", "Paris", ["Lyon", "Marseille", "Paris", "Nice"], "Sungai Seine mengalir di kota ini."],
+      ["Italia", "Roma", ["Milan", "Napoli", "Roma", "Florence"], "Kota kuno ini dikenal sebagai Kota Abadi."],
+      ["Spanyol", "Madrid", ["Barcelona", "Valencia", "Madrid", "Seville"], "Terletak di bagian tengah Semenanjung Iberia."],
+      ["Jerman", "Berlin", ["Munich", "Hamburg", "Berlin", "Frankfurt"], "Tembok terkenal pernah membelah kota ini."],
+      ["Portugal", "Lisbon", ["Porto", "Lisbon", "Braga", "Faro"], "Kota ini terletak di tepi Sungai Tagus."],
+      ["Norwegia", "Oslo", ["Bergen", "Trondheim", "Oslo", "Stavanger"], "Berada di ujung Oslofjord."],
+      ["Turki", "Ankara", ["Istanbul", "Izmir", "Ankara", "Antalya"], "Bukan Istanbul; kota ini berada di Anatolia tengah."],
+      ["Kenya", "Nairobi", ["Mombasa", "Nairobi", "Kisumu", "Nakuru"], "Kota ini dekat taman nasional dengan nama yang sama."],
+      ["Mesir", "Kairo", ["Alexandria", "Giza", "Kairo", "Luxor"], "Terletak dekat delta Sungai Nil."],
+      ["Maroko", "Rabat", ["Casablanca", "Marrakesh", "Rabat", "Tangier"], "Kota ini berada di pantai Atlantik."],
+      ["Nigeria", "Abuja", ["Lagos", "Kano", "Abuja", "Ibadan"], "Kota ini menjadi ibu kota menggantikan Lagos pada 1991."],
+      ["Etiopia", "Addis Ababa", ["Addis Ababa", "Dire Dawa", "Gondar", "Mekelle"], "Namanya bermakna 'bunga baru'."],
+      ["Amerika Serikat", "Washington, D.C.", ["New York", "Washington, D.C.", "Los Angeles", "Chicago"], "Singkatan D.C. berarti District of Columbia."],
+      ["Kanada", "Ottawa", ["Toronto", "Vancouver", "Ottawa", "Montreal"], "Terletak di provinsi Ontario, dekat Quebec."],
+      ["Meksiko", "Mexico City", ["Guadalajara", "Cancún", "Mexico City", "Monterrey"], "Kota ini dibangun di area bekas Danau Texcoco."],
+      ["Brasil", "Brasília", ["Rio de Janeiro", "São Paulo", "Brasília", "Salvador"], "Kota terencana ini diresmikan pada 1960."],
+      ["Argentina", "Buenos Aires", ["Córdoba", "Buenos Aires", "Mendoza", "Rosario"], "Namanya berarti 'udara yang baik'."],
+      ["Peru", "Lima", ["Cusco", "Arequipa", "Lima", "Trujillo"], "Terletak di pesisir Pasifik."],
+      ["Kolombia", "Bogotá", ["Medellín", "Cartagena", "Bogotá", "Cali"], "Berada di dataran tinggi Andes."],
+      ["Chili", "Santiago", ["Valparaíso", "Concepción", "Santiago", "Antofagasta"], "Terletak di lembah tengah Chili."],
+      ["Arab Saudi", "Riyadh", ["Jeddah", "Riyadh", "Mekah", "Dammam"], "Kota ini berada di kawasan Najd."],
+      ["Uni Emirat Arab", "Abu Dhabi", ["Dubai", "Sharjah", "Abu Dhabi", "Ajman"], "Emirat terbesar berdasarkan luas wilayah memiliki ibu kota ini."],
+      ["Nepal", "Kathmandu", ["Pokhara", "Kathmandu", "Biratnagar", "Lalitpur"], "Terletak di sebuah lembah di Himalaya."],
+      ["Belgia", "Brussels", ["Antwerp", "Brussels", "Ghent", "Bruges"], "Banyak lembaga Uni Eropa berkantor di sini."],
+      ["Belanda", "Amsterdam", ["Rotterdam", "The Hague", "Amsterdam", "Utrecht"], "Secara konstitusional inilah ibu kotanya, walau pemerintahan berada di Den Haag."],
+      ["Swiss", "Bern", ["Zurich", "Geneva", "Bern", "Basel"], "Kota ini sering disebut sebagai kota federal Swiss."],
+      ["Austria", "Wina", ["Salzburg", "Graz", "Wina", "Innsbruck"], "Dalam bahasa Jerman, kota ini disebut Wien."],
+      ["Polandia", "Warsawa", ["Kraków", "Gdańsk", "Warsawa", "Łódź"], "Kota ini dibangun kembali setelah Perang Dunia II."],
+      ["Yunani", "Athena", ["Thessaloniki", "Athena", "Patras", "Heraklion"], "Kota ini terkait dengan Acropolis dan Parthenon."],
+      ["Swedia", "Stockholm", ["Gothenburg", "Malmö", "Stockholm", "Uppsala"], "Kota ini tersebar di beberapa pulau."],
+      ["Finlandia", "Helsinki", ["Turku", "Tampere", "Helsinki", "Oulu"], "Terletak di pesisir Teluk Finlandia."],
+      ["Denmark", "Kopenhagen", ["Aarhus", "Odense", "Kopenhagen", "Aalborg"], "Dalam bahasa Denmark disebut København."],
+      ["Irlandia", "Dublin", ["Cork", "Galway", "Dublin", "Limerick"], "Sungai Liffey mengalir di kota ini."],
+      ["Islandia", "Reykjavik", ["Akureyri", "Reykjavik", "Keflavik", "Hafnarfjörður"], "Ibu kota paling utara di antara negara berdaulat."],
+      ["Hungaria", "Budapest", ["Debrecen", "Szeged", "Budapest", "Pécs"], "Terbentuk dari penyatuan Buda dan Pest di tepi Danube."],
+      ["Rumania", "Bucharest", ["Cluj-Napoca", "Timișoara", "Bucharest", "Iași"], "Sering dijuluki Little Paris pada awal abad ke-20."],
+      ["Ukraina", "Kyiv", ["Lviv", "Odesa", "Kyiv", "Kharkiv"], "Kota ini terletak di tepi Sungai Dnipro."],
+      ["Arab Saudi", "Riyadh", ["Riyadh", "Jeddah", "Taif", "Medina"], "Kota pedalaman yang menjadi pusat pemerintahan modern Saudi."],
+      ["Iran", "Teheran", ["Isfahan", "Shiraz", "Teheran", "Tabriz"], "Berada di kaki Pegunungan Alborz."],
+      ["Irak", "Baghdad", ["Basra", "Mosul", "Baghdad", "Najaf"], "Pernah menjadi pusat penting Kekhalifahan Abbasiyah."],
+      ["Pakistan", "Islamabad", ["Karachi", "Lahore", "Islamabad", "Peshawar"], "Kota terencana yang menjadi ibu kota sejak 1960-an."],
+      ["Bangladesh", "Dhaka", ["Chittagong", "Dhaka", "Khulna", "Rajshahi"], "Terletak di tepi Sungai Buriganga."],
+      ["Filipina", "Manila", ["Cebu", "Davao", "Manila", "Quezon City"], "Berada di pulau Luzon."],
+      ["Malaysia", "Kuala Lumpur", ["Johor Bahru", "Putrajaya", "Kuala Lumpur", "Kota Kinabalu"], "Menara Kembar Petronas berada di kota ini."],
+      ["Kamboja", "Phnom Penh", ["Siem Reap", "Battambang", "Phnom Penh", "Sihanoukville"], "Berada di pertemuan Sungai Mekong dan Tonlé Sap."],
+      ["Laos", "Vientiane", ["Luang Prabang", "Vientiane", "Pakse", "Savannakhet"], "Kota ini berada di tepi Sungai Mekong."],
+      ["Myanmar", "Naypyidaw", ["Yangon", "Mandalay", "Naypyidaw", "Bagan"], "Ibu kota administratif yang relatif baru."],
+      ["Kazakhstan", "Astana", ["Almaty", "Astana", "Shymkent", "Karaganda"], "Kota ini kembali memakai nama Astana pada 2022."],
+      ["Uzbekistan", "Tashkent", ["Samarkand", "Bukhara", "Tashkent", "Khiva"], "Kota ini merupakan salah satu kota besar Asia Tengah."],
+      ["Afghanistan", "Kabul", ["Herat", "Kandahar", "Kabul", "Mazar-i-Sharif"], "Terletak di lembah pegunungan Hindu Kush."],
+      ["Afrika Selatan", "Pretoria", ["Cape Town", "Johannesburg", "Pretoria", "Durban"], "Salah satu dari tiga ibu kota negara ini dan menjadi pusat administratif."],
+      ["Tanzania", "Dodoma", ["Dar es Salaam", "Dodoma", "Arusha", "Mwanza"], "Ibu kota resmi yang berada di bagian tengah negara."],
+      ["Ghana", "Accra", ["Kumasi", "Accra", "Tamale", "Takoradi"], "Berada di pesisir Teluk Guinea."],
+      ["Senegal", "Dakar", ["Saint-Louis", "Dakar", "Touba", "Kaolack"], "Terletak di ujung paling barat Afrika."],
+      ["Aljazair", "Aljir", ["Oran", "Constantine", "Aljir", "Annaba"], "Kota ini menghadap Laut Mediterania."],
+      ["Tunisia", "Tunis", ["Sfax", "Tunis", "Sousse", "Kairouan"], "Dekat dengan situs kuno Kartago."],
+      ["Uganda", "Kampala", ["Entebbe", "Kampala", "Jinja", "Gulu"], "Terletak dekat Danau Victoria."],
+      ["Rwanda", "Kigali", ["Butare", "Kigali", "Musanze", "Gisenyi"], "Kota ini berada di negara yang dikenal sebagai 'negeri seribu bukit'."],
+      ["Zimbabwe", "Harare", ["Bulawayo", "Harare", "Mutare", "Gweru"], "Nama sebelumnya adalah Salisbury pada era kolonial."],
+      ["Kuba", "Havana", ["Santiago de Cuba", "Havana", "Camagüey", "Holguín"], "Kota ini berada di pesisir utara Pulau Kuba."],
+      ["Jamaika", "Kingston", ["Montego Bay", "Kingston", "Portmore", "Spanish Town"], "Terletak di pesisir tenggara Jamaika."],
+      ["Panama", "Panama City", ["Colón", "Panama City", "David", "Santiago"], "Kota ini dekat kanal terkenal yang menghubungkan dua samudra."],
+      ["Venezuela", "Caracas", ["Maracaibo", "Caracas", "Valencia", "Barquisimeto"], "Terletak di lembah dekat pesisir Karibia."],
+      ["Ekuador", "Quito", ["Guayaquil", "Cuenca", "Quito", "Loja"], "Salah satu ibu kota tertinggi di dunia."],
+      ["Bolivia", "Sucre", ["La Paz", "Santa Cruz", "Sucre", "Cochabamba"], "Secara konstitusional ibu kota negara ini adalah kota tersebut."],
+      ["Paraguay", "Asunción", ["Ciudad del Este", "Asunción", "Encarnación", "Luque"], "Terletak di tepi Sungai Paraguay."],
+      ["Uruguay", "Montevideo", ["Punta del Este", "Salto", "Montevideo", "Paysandú"], "Berada di tepi Río de la Plata."],
+      ["Guyana", "Georgetown", ["Linden", "Georgetown", "New Amsterdam", "Bartica"], "Ibu kota negara berbahasa Inggris di Amerika Selatan."],
+      ["Suriname", "Paramaribo", ["Nieuw Nickerie", "Paramaribo", "Albina", "Brokopondo"], "Negara ini bertetangga dengan Guyana dan Guyana Prancis."],
+      ["Kosta Rika", "San José", ["Liberia", "San José", "Cartago", "Heredia"], "Terletak di Lembah Tengah Kosta Rika."],
+      ["Guatemala", "Guatemala City", ["Antigua", "Guatemala City", "Quetzaltenango", "Flores"], "Namanya sama dengan nama negaranya."],
+      ["Honduras", "Tegucigalpa", ["San Pedro Sula", "Tegucigalpa", "La Ceiba", "Comayagua"], "Kota ini berada di kawasan pegunungan."],
+      ["Republik Dominika", "Santo Domingo", ["Santiago", "Punta Cana", "Santo Domingo", "La Romana"], "Salah satu permukiman Eropa tertua di Amerika."],
+      ["Haiti", "Port-au-Prince", ["Cap-Haïtien", "Port-au-Prince", "Gonaïves", "Jacmel"], "Namanya secara harfiah berarti 'pelabuhan sang pangeran'."],
+      ["Selandia Baru", "Wellington", ["Auckland", "Wellington", "Hamilton", "Napier"], "Kota ini dikenal berangin dan berada di Selat Cook."],
+      ["Belarus", "Minsk", ["Brest", "Gomel", "Minsk", "Vitebsk"], "Terletak di tepi Sungai Svislach."],
+      ["Bulgaria", "Sofia", ["Plovdiv", "Varna", "Sofia", "Burgas"], "Terletak di kaki Gunung Vitosha."],
+      ["Serbia", "Beograd", ["Novi Sad", "Niš", "Beograd", "Kragujevac"], "Dalam bahasa Inggris dikenal sebagai Belgrade."],
+      ["Kroasia", "Zagreb", ["Split", "Dubrovnik", "Zagreb", "Rijeka"], "Kota ini terletak di dekat Sungai Sava."],
+      ["Ceko", "Praha", ["Brno", "Praha", "Ostrava", "Plzeň"], "Sungai Vltava mengalir melalui kota ini."],
+      ["Slovakia", "Bratislava", ["Košice", "Bratislava", "Žilina", "Nitra"], "Ibu kota yang dekat dengan Austria dan Hungaria."],
+      ["Lithuania", "Vilnius", ["Kaunas", "Klaipėda", "Vilnius", "Šiauliai"], "Kota tua ini masuk daftar Warisan Dunia UNESCO."],
+      ["Latvia", "Riga", ["Daugavpils", "Riga", "Liepāja", "Jelgava"], "Terletak di tepi Sungai Daugava."],
+      ["Estonia", "Tallinn", ["Tartu", "Tallinn", "Narva", "Pärnu"], "Kota tua abad pertengahan di pesisir Baltik."],
+      ["Qatar", "Doha", ["Al Rayyan", "Doha", "Al Wakrah", "Umm Salal"], "Kota ini berada di pesisir Teluk Persia."],
+      ["Kuwait", "Kuwait City", ["Al Jahra", "Kuwait City", "Salmiya", "Hawally"], "Namanya sama dengan nama negara."],
+      ["Oman", "Muscat", ["Salalah", "Muscat", "Sohar", "Nizwa"], "Terletak di pesisir Teluk Oman."],
+      ["Yordania", "Amman", ["Aqaba", "Irbid", "Amman", "Zarqa"], "Kota ini dibangun di atas beberapa bukit."],
+      ["Israel", "Yerusalem", ["Tel Aviv", "Haifa", "Yerusalem", "Eilat"], "Kota ini memiliki makna keagamaan bagi tiga agama Abrahamik."],
+      ["Korea Utara", "Pyongyang", ["Hamhung", "Pyongyang", "Chongjin", "Kaesong"], "Terletak di tepi Sungai Taedong."]
+    ].map(([country, correct, options, hint]) => ({
+      category: "Ibu Kota Dunia",
+      difficulty: "Atlas Global",
+      question: `Apakah ibu kota dari ${country}?`,
+      options,
+      correct,
+      hint
+    }));
+
+    const historyQuestions = [
+      ["VOC", "Vereenigde Oostindische Compagnie", ["Vereenigde Oostindische Compagnie", "Verenigde Overzeese Commissie", "Vereenigde Oranje Compagnie", "Vlaamse Oost-Indische Company"], "Singkatan ini berasal dari bahasa Belanda dan berarti Perusahaan Hindia Timur Bersatu."],
+      ["VOC didirikan pada tahun", "1602", ["1596", "1602", "1619", "1799"], "Tahun ini juga berkaitan dengan penyatuan beberapa perusahaan dagang Belanda."],
+      ["Kota yang dijadikan pusat kekuasaan VOC di Nusantara adalah", "Batavia", ["Banten", "Batavia", "Makassar", "Ambon"], "Nama kota ini kemudian berubah menjadi Jakarta."],
+      ["Tokoh VOC yang mendirikan Batavia pada 1619 adalah", "Jan Pieterszoon Coen", ["Herman Willem Daendels", "Jan Pieterszoon Coen", "Thomas Stamford Raffles", "Pieter Both"], "Ia terkenal dengan kebijakan keras VOC di Asia."],
+      ["Nama Jayakarta diganti menjadi Batavia oleh", "VOC", ["Kesultanan Banten", "VOC", "Pemerintah Jepang", "Kerajaan Inggris"], "Perubahan nama terjadi setelah penaklukan kota pada 1619."],
+      ["Hak istimewa VOC untuk monopoli dagang disebut", "Octrooi", ["Politik Etis", "Octrooi", "Cultuurstelsel", "Pacht"], "Istilah ini merujuk pada piagam atau hak khusus."],
+      ["Salah satu hak VOC dalam Octrooi adalah", "Mencetak uang", ["Mencetak uang", "Mengubah konstitusi Belanda", "Membentuk parlemen Indonesia", "Menyatakan kemerdekaan"], "VOC memiliki kewenangan seperti negara dalam wilayah operasinya."],
+      ["Tujuan utama pembentukan VOC adalah", "Menguasai perdagangan rempah-rempah", ["Menguasai perdagangan rempah-rempah", "Mendirikan sekolah rakyat", "Membuka jalur kereta api", "Menyatukan kerajaan Nusantara"], "Komoditas seperti cengkih dan pala sangat bernilai di Eropa."],
+      ["Pulau yang terkenal sebagai pusat pala pada masa VOC adalah", "Banda", ["Banda", "Madura", "Bali", "Nias"], "Kepulauan ini berada di Maluku."],
+      ["Kebijakan pelayaran Hongi dilakukan VOC terutama di", "Maluku", ["Maluku", "Jawa Barat", "Sumatra Timur", "Kalimantan Selatan"], "Kebijakan ini berkaitan dengan pengawasan produksi cengkih."],
+      ["Tujuan pelayaran Hongi adalah", "Menjaga monopoli rempah VOC", ["Menjaga monopoli rempah VOC", "Mencari jalur haji", "Mengangkut pegawai ke Batavia", "Membuka sekolah pelaut"], "VOC mengawasi agar produksi tidak melebihi kebutuhan monopoli."],
+      ["Istilah ekstirpasi pada masa VOC berarti", "Penebangan tanaman rempah berlebih", ["Penebangan tanaman rempah berlebih", "Pembangunan benteng", "Pajak tanah", "Pemindahan ibu kota"], "Kebijakan ini dilakukan agar harga rempah tetap tinggi."],
+      ["Perlawanan rakyat Maluku terhadap VOC dipimpin antara lain oleh", "Pattimura", ["Pattimura", "Sisingamangaraja XII", "Sultan Ageng Tirtayasa", "Pangeran Diponegoro"], "Tokoh ini bernama asli Thomas Matulessy."],
+      ["Pattimura memimpin perlawanan di Maluku pada tahun", "1817", ["1817", "1602", "1825", "1908"], "Perlawanan ini terjadi setelah Inggris menyerahkan kembali wilayah kepada Belanda."],
+      ["Tokoh yang dikenal sebagai Sultan Nuku berasal dari", "Tidore", ["Tidore", "Banten", "Mataram", "Aceh"], "Ia melawan dominasi VOC di Maluku Utara."],
+      ["Kesultanan yang dipimpin Sultan Ageng Tirtayasa melawan VOC adalah", "Banten", ["Banten", "Demak", "Gowa", "Ternate"], "Kesultanan ini menguasai pelabuhan penting di Jawa bagian barat."],
+      ["Sultan Hasanuddin dikenal sebagai pemimpin Kerajaan", "Gowa", ["Gowa", "Banten", "Mataram", "Tidore"], "Kerajaan ini berpusat di Sulawesi Selatan."],
+      ["Julukan Sultan Hasanuddin adalah", "Ayam Jantan dari Timur", ["Ayam Jantan dari Timur", "Singa Jawa", "Harimau Sumatra", "Elang Maluku"], "Julukan ini menggambarkan keberaniannya melawan VOC."],
+      ["Perjanjian yang memaksa Gowa mengakui dominasi VOC adalah", "Perjanjian Bongaya", ["Perjanjian Bongaya", "Perjanjian Giyanti", "Perjanjian Tuntang", "Perjanjian Saragosa"], "Perjanjian ini ditandatangani pada 1667."],
+      ["Perang Makassar berakhir dengan", "Perjanjian Bongaya", ["Perjanjian Bongaya", "Perjanjian Roem-Royen", "Perjanjian Kalijati", "Konferensi Meja Bundar"], "Perjanjian ini sangat melemahkan posisi Gowa."],
+      ["VOC dibubarkan pada tahun", "1799", ["1799", "1750", "1811", "1830"], "Utang dan korupsi menjadi faktor besar keruntuhannya."],
+      ["Setelah VOC bubar, wilayah kekuasaannya diambil alih oleh", "Pemerintah Belanda", ["Pemerintah Belanda", "Kerajaan Inggris", "Kesultanan Mataram", "Pemerintah Jepang"], "Pengambilalihan ini menandai fase kolonial negara Belanda."],
+      ["Nama resmi wilayah jajahan Belanda di Indonesia adalah", "Hindia Belanda", ["Hindia Belanda", "Hindia Timur Inggris", "Nusantara Raya", "Republik Batavia"], "Dalam bahasa Belanda disebut Nederlands-Indië."],
+      ["Gubernur Jenderal yang membangun Jalan Raya Pos adalah", "Herman Willem Daendels", ["Herman Willem Daendels", "Jan Pieterszoon Coen", "Van den Bosch", "Raffles"], "Jalan ini terbentang dari Anyer hingga Panarukan."],
+      ["Jalan Raya Pos Daendels menghubungkan", "Anyer dan Panarukan", ["Anyer dan Panarukan", "Batavia dan Banten", "Surabaya dan Malang", "Semarang dan Yogyakarta"], "Panjang jalur ini kira-kira seribu kilometer di Pulau Jawa."],
+      ["Tujuan utama pembangunan Jalan Raya Pos adalah", "Pertahanan dan mobilitas pemerintahan", ["Pertahanan dan mobilitas pemerintahan", "Pariwisata kolonial", "Perkebunan teh rakyat", "Jalur pendidikan"], "Ancaman Inggris membuat jalur cepat sangat penting."],
+      ["Pada masa 1811–1816, Indonesia dikuasai oleh", "Inggris", ["Inggris", "Portugis", "Spanyol", "Jepang"], "Kekuasaan ini berlangsung singkat saat Belanda berada di bawah pengaruh Prancis."],
+      ["Penguasa Inggris di Jawa yang terkenal dengan sistem sewa tanah adalah", "Thomas Stamford Raffles", ["Thomas Stamford Raffles", "Daendels", "Van den Bosch", "Pieter Both"], "Ia juga menulis buku History of Java."],
+      ["Sistem pajak tanah pada masa Raffles dikenal sebagai", "Landrent", ["Landrent", "Cultuurstelsel", "Contingenten", "Hongitochten"], "Petani membayar sewa tanah kepada pemerintah."],
+      ["Perjanjian Tuntang tahun 1811 menandai", "Penyerahan kekuasaan Belanda kepada Inggris", ["Penyerahan kekuasaan Belanda kepada Inggris", "Pembubaran VOC", "Berakhirnya Perang Diponegoro", "Masuknya Jepang"], "Perjanjian ini terjadi setelah pasukan Inggris menang di Jawa."],
+      ["Sistem Tanam Paksa diperkenalkan oleh", "Johannes van den Bosch", ["Johannes van den Bosch", "Daendels", "Raffles", "Van Heutsz"], "Ia menjadi Gubernur Jenderal pada 1830."],
+      ["Nama Belanda Sistem Tanam Paksa adalah", "Cultuurstelsel", ["Cultuurstelsel", "Landrent", "Octrooi", "Politik Etis"], "Secara harfiah terkait sistem budidaya."],
+      ["Sistem Tanam Paksa mulai diterapkan pada tahun", "1830", ["1800", "1811", "1830", "1901"], "Tahun ini menjadi titik awal kebijakan ekonomi kolonial yang sangat menekan."],
+      ["Salah satu tanaman wajib dalam Tanam Paksa adalah", "Kopi", ["Kopi", "Padi", "Jagung", "Singkong"], "Tanaman ekspor ini menghasilkan keuntungan besar bagi pemerintah Belanda."],
+      ["Kritik terhadap Tanam Paksa yang terkenal ditulis Multatuli dalam novel", "Max Havelaar", ["Max Havelaar", "Siti Nurbaya", "Layar Terkembang", "Bumi Manusia"], "Novel ini terbit pada 1860 dan mengkritik penindasan kolonial."],
+      ["Nama asli Multatuli adalah", "Eduard Douwes Dekker", ["Eduard Douwes Dekker", "Ernest Douwes Dekker", "Suwardi Suryaningrat", "Tirto Adhi Soerjo"], "Ia pernah menjadi asisten residen di Lebak."],
+      ["Kebijakan Politik Etis diumumkan Belanda pada tahun", "1901", ["1870", "1901", "1908", "1928"], "Kebijakan ini sering dikaitkan dengan gagasan 'utang kehormatan'."],
+      ["Tiga program Politik Etis dikenal sebagai", "Irigasi, edukasi, transmigrasi", ["Irigasi, edukasi, transmigrasi", "Pajak, kerja rodi, tanam paksa", "Monopoli, ekstirpasi, Hongi", "Militer, perdagangan, perbudakan"], "Tiga kata ini sering disingkat sebagai program pembangunan kolonial."],
+      ["Tokoh yang mengemukakan gagasan 'utang kehormatan' adalah", "C.Th. van Deventer", ["C.Th. van Deventer", "Van den Bosch", "Daendels", "Snouck Hurgronje"], "Ia menulis artikel Een Eereschuld."],
+      ["Perang Diponegoro berlangsung pada tahun", "1825–1830", ["1825–1830", "1817–1820", "1873–1904", "1908–1912"], "Perang besar di Jawa ini berlangsung lima tahun."],
+      ["Pangeran Diponegoro berasal dari lingkungan keraton", "Yogyakarta", ["Yogyakarta", "Surakarta", "Banten", "Cirebon"], "Ia adalah putra Sultan Hamengkubuwono III."],
+      ["Salah satu pemicu Perang Diponegoro adalah", "Pemasangan patok jalan melewati tanah leluhur", ["Pemasangan patok jalan melewati tanah leluhur", "Pembubaran VOC", "Larangan menanam kopi", "Pindahnya ibu kota"], "Patok tersebut dipasang di wilayah Tegalrejo."],
+      ["Strategi perang yang digunakan Diponegoro adalah", "Gerilya", ["Gerilya", "Perang laut", "Blokade udara", "Diplomasi kongres"], "Strategi ini mengandalkan mobilitas dan dukungan rakyat."],
+      ["Benteng stelsel digunakan Belanda untuk menghadapi", "Perang Diponegoro", ["Perang Diponegoro", "Perang Aceh", "Perang Padri", "Perang Makassar"], "Belanda membangun jaringan benteng untuk mempersempit gerak pasukan lawan."],
+      ["Pangeran Diponegoro ditangkap di", "Magelang", ["Magelang", "Yogyakarta", "Semarang", "Surabaya"], "Penangkapan terjadi saat perundingan pada 1830."],
+      ["Pangeran Diponegoro diasingkan hingga wafat di", "Makassar", ["Makassar", "Ambon", "Batavia", "Banda Neira"], "Ia wafat di Fort Rotterdam."],
+      ["Perang Padri terjadi di wilayah", "Sumatra Barat", ["Sumatra Barat", "Jawa Tengah", "Sulawesi Selatan", "Maluku"], "Perang ini berkaitan dengan konflik internal dan campur tangan kolonial."],
+      ["Tokoh utama Perang Padri adalah", "Tuanku Imam Bonjol", ["Tuanku Imam Bonjol", "Tuanku Tambusai", "Sultan Nuku", "Pattimura"], "Namanya diambil dari sebuah nagari di Sumatra Barat."],
+      ["Tuanku Imam Bonjol ditangkap dan diasingkan ke", "Manado", ["Manado", "Banda Neira", "Banten", "Batavia"], "Ia kemudian dipindahkan lagi ke Minahasa."],
+      ["Perang Aceh dimulai pada tahun", "1873", ["1825", "1873", "1908", "1942"], "Perang ini berlangsung sangat lama dan mahal bagi Belanda."],
+      ["Tokoh pejuang perempuan Aceh yang terkenal adalah", "Cut Nyak Dhien", ["Cut Nyak Dhien", "Dewi Sartika", "R.A. Kartini", "Martha Christina Tiahahu"], "Ia melanjutkan perjuangan setelah suaminya gugur."],
+      ["Tokoh Aceh yang dikenal sebagai Teuku Umar adalah", "Pejuang yang sempat memakai siasat bergabung dengan Belanda", ["Pejuang yang sempat memakai siasat bergabung dengan Belanda", "Pendiri VOC", "Gubernur Jenderal Belanda", "Tokoh Politik Etis"], "Ia memanfaatkan senjata dan perlengkapan kolonial untuk perjuangan Aceh."],
+      ["Penasihat Belanda dalam strategi menghadapi Aceh adalah", "Snouck Hurgronje", ["Snouck Hurgronje", "Van Deventer", "Multatuli", "Raffles"], "Ia mempelajari masyarakat dan budaya Aceh."],
+      ["Sisingamangaraja XII memimpin perlawanan di", "Tapanuli", ["Tapanuli", "Banten", "Bali", "Lombok"], "Wilayah ini berada di Sumatra Utara."],
+      ["Pahlawan Bali yang memimpin Puputan Badung adalah", "I Gusti Ngurah Made Agung", ["I Gusti Ngurah Made Agung", "Pattimura", "Sultan Hasanuddin", "Tuanku Imam Bonjol"], "Puputan berarti perjuangan sampai titik akhir."],
+      ["Puputan dalam sejarah Bali berarti", "Perlawanan sampai habis-habisan", ["Perlawanan sampai habis-habisan", "Perjanjian dagang", "Pajak kerajaan", "Sistem sewa tanah"], "Istilah ini menggambarkan tekad mempertahankan kehormatan."],
+      ["Perlawanan rakyat Banten terhadap VOC dipimpin antara lain oleh", "Sultan Ageng Tirtayasa", ["Sultan Ageng Tirtayasa", "Sultan Nuku", "Pangeran Diponegoro", "Raffles"], "Ia berkonflik dengan putranya yang bersekutu dengan VOC."],
+      ["Tokoh yang mendirikan organisasi Budi Utomo adalah", "Dr. Soetomo", ["Dr. Soetomo", "Soekarno", "Hatta", "Ki Hajar Dewantara"], "Organisasi ini didirikan pada 1908."],
+      ["Budi Utomo berdiri pada tahun", "1908", ["1908", "1912", "1928", "1945"], "Tahun ini diperingati sebagai Hari Kebangkitan Nasional."],
+      ["Sarekat Islam pada awalnya bernama", "Sarekat Dagang Islam", ["Sarekat Dagang Islam", "Indische Partij", "Perhimpunan Indonesia", "Muhammadiyah"], "Organisasi awal ini berkaitan dengan pedagang pribumi."],
+      ["Tokoh pendiri Sarekat Dagang Islam adalah", "Haji Samanhudi", ["Haji Samanhudi", "H.O.S. Tjokroaminoto", "Douwes Dekker", "Ahmad Dahlan"], "Ia merupakan pengusaha batik dari Surakarta."],
+      ["Indische Partij didirikan oleh Tiga Serangkai, salah satunya adalah", "Ernest Douwes Dekker", ["Ernest Douwes Dekker", "Van den Bosch", "Daendels", "Pieter Both"], "Ia kemudian dikenal sebagai Danudirja Setiabudi."],
+      ["Tiga Serangkai terdiri atas Douwes Dekker, Ki Hajar Dewantara, dan", "Dr. Cipto Mangunkusumo", ["Dr. Cipto Mangunkusumo", "Dr. Soetomo", "Haji Agus Salim", "Mohammad Hatta"], "Ia dikenal sebagai tokoh pergerakan nasional dan dokter."],
+      ["Nama asli Ki Hajar Dewantara adalah", "Suwardi Suryaningrat", ["Suwardi Suryaningrat", "Raden Mas Soewardi", "Wage Rudolf Supratman", "Raden Ajeng Kartini"], "Ia menggunakan nama baru setelah meninggalkan gelar kebangsawanan."],
+      ["Tulisan Ki Hajar Dewantara yang mengkritik Belanda berjudul", "Als Ik Een Nederlander Was", ["Als Ik Een Nederlander Was", "Max Havelaar", "Indonesia Menggugat", "Habis Gelap Terbitlah Terang"], "Judulnya berarti 'Seandainya Aku Seorang Belanda'."],
+      ["Organisasi pendidikan yang didirikan Ki Hajar Dewantara adalah", "Taman Siswa", ["Taman Siswa", "Budi Utomo", "Muhammadiyah", "Sarekat Islam"], "Didirikan pada 1922."],
+      ["R.A. Kartini dikenal melalui kumpulan surat berjudul", "Habis Gelap Terbitlah Terang", ["Habis Gelap Terbitlah Terang", "Indonesia Menggugat", "Max Havelaar", "Layar Terkembang"], "Judul Belandanya Door Duisternis tot Licht."],
+      ["R.A. Kartini berasal dari", "Jepara", ["Jepara", "Bandung", "Bukittinggi", "Makassar"], "Daerah ini berada di pesisir utara Jawa Tengah."],
+      ["Muhammadiyah didirikan oleh", "KH Ahmad Dahlan", ["KH Ahmad Dahlan", "KH Hasyim Asy'ari", "Haji Samanhudi", "H.O.S. Tjokroaminoto"], "Organisasi ini didirikan di Yogyakarta pada 1912."],
+      ["Nahdlatul Ulama didirikan pada tahun", "1926", ["1908", "1912", "1926", "1928"], "Organisasi ini didirikan oleh para ulama di Surabaya."],
+      ["Perhimpunan Indonesia pada awalnya bernama", "Indische Vereeniging", ["Indische Vereeniging", "Sarekat Dagang Islam", "Jong Java", "Partai Nasional Indonesia"], "Organisasi ini berkembang di Belanda."],
+      ["Tokoh Perhimpunan Indonesia yang kelak menjadi wakil presiden pertama adalah", "Mohammad Hatta", ["Mohammad Hatta", "Sutan Sjahrir", "Soekarno", "Tan Malaka"], "Ia pernah menjadi ketua organisasi mahasiswa di Belanda."],
+      ["Partai Nasional Indonesia didirikan oleh", "Soekarno", ["Soekarno", "Hatta", "Sjahrir", "Semaun"], "Organisasi ini berdiri di Bandung pada 1927."],
+      ["Sumpah Pemuda diperingati setiap", "28 Oktober", ["28 Oktober", "20 Mei", "17 Agustus", "10 November"], "Tanggal ini berkaitan dengan Kongres Pemuda II 1928."],
+      ["Isi penting Sumpah Pemuda adalah pengakuan terhadap", "Satu tanah air, satu bangsa, dan satu bahasa", ["Satu tanah air, satu bangsa, dan satu bahasa", "Satu kerajaan, satu agama, satu adat", "Satu pemerintahan, satu mata uang, satu bendera", "Satu pulau, satu kota, satu pelabuhan"], "Rumusan ini menjadi tonggak persatuan nasional."],
+      ["Lagu Indonesia Raya pertama kali diperdengarkan pada", "Kongres Pemuda II", ["Kongres Pemuda II", "Kongres Budi Utomo", "Sidang BPUPKI", "Konferensi Meja Bundar"], "Peristiwa ini berlangsung pada 1928."],
+      ["Pencipta lagu Indonesia Raya adalah", "W.R. Supratman", ["W.R. Supratman", "Ismail Marzuki", "Kusbini", "Cornel Simanjuntak"], "Ia memainkan lagu tersebut dengan biola."],
+      ["Kebijakan ekonomi liberal di Hindia Belanda mulai kuat setelah", "Undang-Undang Agraria 1870", ["Undang-Undang Agraria 1870", "Perjanjian Tuntang", "Sumpah Pemuda", "Tanam Paksa 1830"], "Undang-undang ini membuka peluang investasi swasta asing."],
+      ["Undang-Undang Agraria 1870 berkaitan dengan", "Pembukaan perkebunan swasta", ["Pembukaan perkebunan swasta", "Pembubaran sekolah", "Monopoli VOC", "Pembangunan Jalan Raya Pos"], "Kebijakan ini mendorong kapitalisme perkebunan."],
+      ["Koeli Ordonantie berkaitan dengan", "Perburuhan perkebunan", ["Perburuhan perkebunan", "Sistem pendidikan", "Pelayaran Hongi", "Pajak tanah"], "Aturan ini mengikat buruh kontrak secara keras."],
+      ["Poenale Sanctie adalah", "Sanksi pidana bagi buruh kontrak yang melanggar", ["Sanksi pidana bagi buruh kontrak yang melanggar", "Pajak rempah VOC", "Perjanjian damai Aceh", "Program edukasi Politik Etis"], "Kebijakan ini menjadi simbol penindasan buruh perkebunan."],
+      ["Pemerintahan kolonial Belanda dipimpin di Hindia Belanda oleh", "Gubernur Jenderal", ["Gubernur Jenderal", "Presiden", "Sultan", "Residen Inggris"], "Pejabat ini berkedudukan di Batavia."],
+      ["Salah satu pembagian administratif kolonial di bawah gubernur jenderal adalah", "Karesidenan", ["Karesidenan", "Provinsi federal", "Negara bagian", "Kesatuan adat"], "Wilayah ini dipimpin oleh seorang residen."],
+      ["Tokoh yang dijuluki Bapak Pendidikan Nasional adalah", "Ki Hajar Dewantara", ["Ki Hajar Dewantara", "R.A. Kartini", "Dr. Soetomo", "Ahmad Dahlan"], "Tanggal kelahirannya diperingati sebagai Hari Pendidikan Nasional."],
+      ["Hari Kebangkitan Nasional berkaitan dengan berdirinya", "Budi Utomo", ["Budi Utomo", "Sarekat Islam", "PNI", "Taman Siswa"], "Organisasi ini didirikan oleh pelajar STOVIA."],
+      ["STOVIA merupakan sekolah pendidikan untuk", "Dokter pribumi", ["Dokter pribumi", "Pelaut VOC", "Pegawai Inggris", "Tentara Jepang"], "Singkatan ini berasal dari bahasa Belanda."],
+      ["Tokoh yang mendirikan sekolah Kautamaan Istri adalah", "Dewi Sartika", ["Dewi Sartika", "Cut Nyak Dhien", "Kartini", "Martha Christina Tiahahu"], "Ia berasal dari Jawa Barat."],
+      ["Martha Christina Tiahahu adalah pahlawan dari", "Maluku", ["Maluku", "Aceh", "Bali", "Sumatra Barat"], "Ia terlibat dalam perlawanan terhadap Belanda pada usia muda."],
+      ["Kapitan Pattimura bernama asli", "Thomas Matulessy", ["Thomas Matulessy", "Frans Kaisiepo", "Sultan Nuku", "Johannes Latuharhary"], "Ia berasal dari Saparua, Maluku."],
+      ["Benteng yang berhasil direbut Pattimura pada 1817 adalah", "Benteng Duurstede", ["Benteng Duurstede", "Benteng Vredeburg", "Benteng Rotterdam", "Benteng Marlborough"], "Benteng ini berada di Saparua."],
+      ["Perjanjian Giyanti tahun 1755 membagi kerajaan", "Mataram", ["Mataram", "Banten", "Gowa", "Aceh"], "Pembagian ini melahirkan Kesultanan Yogyakarta dan Kasunanan Surakarta."],
+      ["Perjanjian Giyanti melahirkan Kesultanan Yogyakarta dan", "Kasunanan Surakarta", ["Kasunanan Surakarta", "Kesultanan Banten", "Kerajaan Gowa", "Kesultanan Tidore"], "Dua pusat kekuasaan Jawa ini terbentuk dari pecahnya Mataram."],
+      ["Raffles dikenal juga karena menemukan kembali situs", "Candi Borobudur", ["Candi Borobudur", "Candi Prambanan", "Kota Tua Batavia", "Benteng Duurstede"], "Situs Buddha besar ini berada di Jawa Tengah."],
+      ["Salah satu dampak kolonialisme terhadap ekonomi Nusantara adalah", "Eksploitasi sumber daya dan tenaga kerja", ["Eksploitasi sumber daya dan tenaga kerja", "Penghapusan semua pajak", "Kemandirian industri nasional penuh", "Pembagian tanah merata"], "Kolonialisme terutama diarahkan untuk keuntungan negara dan modal asing."],
+      ["Salah satu dampak Politik Etis yang penting bagi nasionalisme adalah", "Munculnya kaum terpelajar", ["Munculnya kaum terpelajar", "Kembalinya VOC", "Berakhirnya semua perkebunan", "Penghapusan pemerintahan kolonial"], "Kelompok terdidik kemudian memimpin banyak organisasi pergerakan."],
+      ["Penggunaan istilah 'Indonesia' menguat dalam pergerakan nasional karena", "Mendorong identitas kebangsaan bersama", ["Mendorong identitas kebangsaan bersama", "Nama resmi VOC", "Nama kapal dagang", "Nama pajak tanah"], "Istilah ini melampaui identitas kedaerahan."],
+      ["Tujuan utama perlawanan terhadap kolonialisme adalah", "Mempertahankan kedaulatan dan menolak penindasan", ["Mempertahankan kedaulatan dan menolak penindasan", "Memperluas monopoli Eropa", "Menghapus semua kerajaan", "Mendirikan VOC baru"], "Perlawanan terjadi dalam banyak bentuk: perang, diplomasi, pendidikan, dan organisasi."]
+    ].map(([question, correct, options, hint]) => ({
+      category: "Sejarah Indonesia",
+      difficulty: "Arsip Kolonial",
+      question,
+      options,
+      correct,
+      hint
+    }));
+
+    const questions = [...capitalQuestions, ...historyQuestions];
+
+    let activeQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let hintsUsed = 0;
+    let hintPenalty = 0;
+    let answered = false;
+    let hintUsedForQuestion = false;
+
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const answerList = document.getElementById("answer-list");
+    const progressText = document.getElementById("progress-text");
+    const categoryText = document.getElementById("category-text");
+    const scoreText = document.getElementById("score-text");
+    const hintCountText = document.getElementById("hint-count-text");
+    const hintPenaltyText = document.getElementById("hint-penalty-text");
+    const feedbackText = document.getElementById("feedback-text");
+    const nextButton = document.getElementById("next-button");
+    const hintButton = document.getElementById("hint-button");
+    const hintBox = document.getElementById("hint-box");
+    const archiveTopic = document.getElementById("archive-topic");
+
+    function shuffle(items) {
+      const result = [...items];
+      for (let index = result.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [result[index], result[randomIndex]] = [result[randomIndex], result[index]];
+      }
+      return result;
+    }
+
+    function showScreen(screen) {
+      [startScreen, quizScreen, resultScreen].forEach((item) => item.classList.remove("active"));
+      screen.classList.add("active");
+    }
+
+    function updateScoreDisplay() {
+      scoreText.textContent = `Skor ${score}`;
+      hintCountText.textContent = `Hint ${hintsUsed}`;
+      hintPenaltyText.textContent = `Minus ${hintPenalty}`;
+    }
+
+    function beginQuiz() {
+      activeQuestions = shuffle(questions).map((question) => ({
+        ...question,
+        options: shuffle(question.options)
+      }));
+
+      currentIndex = 0;
+      score = 0;
+      correctCount = 0;
+      wrongCount = 0;
+      hintsUsed = 0;
+      hintPenalty = 0;
+      answered = false;
+      hintUsedForQuestion = false;
+
+      showScreen(quizScreen);
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const question = activeQuestions[currentIndex];
+      answered = false;
+      hintUsedForQuestion = false;
+
+      questionText.textContent = question.question;
+      categoryText.textContent = `${question.category} · ${question.difficulty}`;
+      progressText.textContent = `Pertanyaan ${currentIndex + 1} dari ${activeQuestions.length}`;
+      archiveTopic.textContent = question.category === "Ibu Kota Dunia"
+        ? "ATLAS DUNIA • PENANDA IBU KOTA"
+        : "ARSIP NUSANTARA • ERA KOLONIAL";
+
+      updateScoreDisplay();
+      feedbackText.textContent = "";
+      feedbackText.className = "feedback";
+
+      hintBox.textContent = "";
+      hintBox.classList.remove("active");
+
+      hintButton.disabled = false;
+      nextButton.classList.add("hidden");
+      nextButton.disabled = true;
+
+      answerList.replaceChildren();
+
+      question.options.forEach((option, index) => {
+        const button = document.createElement("button");
+        const choiceLabel = document.createElement("span");
+        const choiceText = document.createElement("span");
+
+        button.type = "button";
+        button.className = "answer-button";
+        choiceLabel.className = "choice-index";
+        choiceLabel.textContent = String.fromCharCode(65 + index);
+        choiceText.textContent = option;
+
+        button.append(choiceLabel, choiceText);
+        button.addEventListener("click", () => chooseAnswer(option, button));
+        answerList.appendChild(button);
+      });
+    }
+
+    function useHint() {
+      if (answered || hintUsedForQuestion) return;
+
+      const question = activeQuestions[currentIndex];
+      hintUsedForQuestion = true;
+      hintsUsed += 1;
+      hintPenalty += 10;
+      score -= 10;
+
+      hintBox.textContent = `Petunjuk arsip: ${question.hint} Penalti hint: -10 poin.`;
+      hintBox.classList.add("active");
+      hintButton.disabled = true;
+      updateScoreDisplay();
+    }
+
+    function chooseAnswer(selected, selectedButton) {
+      if (answered) return;
+
+      answered = true;
+      const question = activeQuestions[currentIndex];
+      const buttons = [...answerList.querySelectorAll("button")];
+      const isCorrect = selected === question.correct;
+
+      buttons.forEach((button) => {
+        button.disabled = true;
+        const optionText = button.querySelector("span:last-child").textContent;
+        if (optionText === question.correct) button.classList.add("correct");
+      });
+
+      hintButton.disabled = true;
+
+      if (isCorrect) {
+        score += 10;
+        correctCount += 1;
+        selectedButton.classList.add("correct");
+        feedbackText.innerHTML = `<strong>Benar!</strong> Jawaban yang tepat adalah ${question.correct}.`;
+      } else {
+        score -= 4;
+        wrongCount += 1;
+        selectedButton.classList.add("incorrect");
+        feedbackText.classList.add("wrong");
+        feedbackText.innerHTML = `<strong>Belum tepat.</strong> Jawaban yang benar adalah ${question.correct}.`;
+      }
+
+      updateScoreDisplay();
+      nextButton.classList.remove("hidden");
+      nextButton.disabled = false;
+    }
+
+    function nextQuestion() {
+      if (!answered) return;
+
+      currentIndex += 1;
+
+      if (currentIndex < activeQuestions.length) {
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      const total = activeQuestions.length;
+      const accuracy = Math.round((correctCount / total) * 100);
+      const rawScore = correctCount * 10;
+
+      document.getElementById("final-score").textContent = score;
+      document.getElementById("final-caption").textContent = "skor akhir";
+      document.getElementById("result-percentage").textContent = `${accuracy}% jawaban benar dari ${total} pertanyaan`;
+      document.getElementById("correct-total").textContent = correctCount;
+      document.getElementById("wrong-total").textContent = wrongCount;
+      document.getElementById("hint-total").textContent = hintsUsed;
+      document.getElementById("penalty-total").textContent = `-${hintPenalty}`;
+
+      document.getElementById("score-explanation").textContent =
+        `Rincian skor: ${correctCount} jawaban benar × 10 poin = ${rawScore} poin. ` +
+        `Jawaban salah ${wrongCount} × 4 poin = -${wrongCount * 4} poin. ` +
+        `Penggunaan ${hintsUsed} hint × 10 poin = -${hintPenalty} poin. ` +
+        `Skor akhir = ${rawScore} − ${wrongCount * 4} − ${hintPenalty} = ${score} poin.`;
+
+      let message = "";
+
+      if (accuracy >= 90) {
+        message = "Luar biasa. Catatan atlas dan arsip kolonialmu sangat kuat—kamu membaca dunia dengan ketelitian seorang kurator sejarah.";
+      } else if (accuracy >= 70) {
+        message = "Ekspedisi yang sangat baik. Banyak jalur dunia dan jejak sejarah sudah kamu kuasai; lanjutkan menelusuri detailnya.";
+      } else if (accuracy >= 45) {
+        message = "Perjalanan pengetahuanmu menjanjikan. Ulangi ekspedisi untuk memperdalam rute ibu kota dan konteks sejarah kolonial.";
+      } else {
+        message = "Setiap arsip membuka petunjuk baru. Coba lagi, gunakan hint dengan bijak, dan bangun peta pengetahuanmu sedikit demi sedikit.";
+      }
+
+      document.getElementById("closing-message").textContent = message;
+
+      // Submit score to realtime leaderboard
+      if (socket && socket.connected) {
+        socket.emit("submit-score", { username: currentUsername, score: score });
+      }
+
+      showScreen(resultScreen);
+    }
+
+    let currentUsername = "";
+
+    // Socket.io initialization
+    const socketUrl = window.location.origin.includes("localhost") || window.location.origin.includes("127.0.0.1")
+      ? window.location.origin
+      : "http://localhost:3000";
+
+    let socket;
+    try {
+      socket = io(socketUrl);
+
+      socket.on("connect", () => {
+        console.log("Terhubung ke server arsip leaderboard!");
+      });
+
+      socket.on("leaderboard-update", (leaderboard) => {
+        updateLeaderboardUI(leaderboard);
+      });
+
+      socket.on("connect_error", () => {
+        console.warn("Gagal terhubung ke server realtime leaderboard. Menjalankan mode lokal.");
+      });
+    } catch (e) {
+      console.warn("Library Socket.io tidak dapat dimuat. Menjalankan mode lokal.");
+    }
+
+    function updateLeaderboardUI(leaderboard) {
+      const startBody = document.getElementById("leaderboard-body-start");
+      const resultBody = document.getElementById("leaderboard-body-result");
+      const startEmpty = document.getElementById("leaderboard-empty-start");
+      const resultEmpty = document.getElementById("leaderboard-empty-result");
+
+      if (!leaderboard || leaderboard.length === 0) {
+        if (startEmpty) startEmpty.classList.remove("hidden");
+        if (resultEmpty) resultEmpty.classList.remove("hidden");
+        if (startBody) startBody.replaceChildren();
+        if (resultBody) resultBody.replaceChildren();
+        return;
+      }
+
+      if (startEmpty) startEmpty.classList.add("hidden");
+      if (resultEmpty) resultEmpty.classList.add("hidden");
+
+      const generateRows = () => {
+        return leaderboard.map((entry, index) => {
+          const tr = document.createElement("tr");
+          tr.className = "border-b border-[#42331f]/10 hover:bg-[#42331f]/5 transition-colors";
+          
+          let rankColorClass = "text-[#2d332d]";
+          let rankIcon = "";
+          if (index === 0) {
+            rankColorClass = "text-[#c38b3d] font-bold";
+            rankIcon = " 👑";
+          } else if (index === 1) {
+            rankColorClass = "text-[#7d827d] font-bold";
+            rankIcon = " 🥈";
+          } else if (index === 2) {
+            rankColorClass = "text-[#a34732] font-bold";
+            rankIcon = " 🥉";
+          }
+
+          const isCurrentPlayer = currentUsername && entry.username.toLowerCase() === currentUsername.toLowerCase();
+          if (isCurrentPlayer) {
+            tr.className += " bg-[#356d6b]/10 font-bold";
+          }
+
+          const tdRank = document.createElement("td");
+          tdRank.className = `py-2 px-3 ${rankColorClass}`;
+          tdRank.textContent = `${index + 1}${rankIcon}`;
+
+          const tdName = document.createElement("td");
+          tdName.className = "py-2 px-3 text-[#2d332d]";
+          tdName.textContent = entry.username;
+          if (isCurrentPlayer) {
+            const labelSelf = document.createElement("span");
+            labelSelf.className = "ml-2 text-[10px] bg-[#356d6b] text-[#f7e8bd] px-1 rounded";
+            labelSelf.textContent = "ANDA";
+            tdName.appendChild(labelSelf);
+          }
+
+          const tdScore = document.createElement("td");
+          tdScore.className = "py-2 px-3 text-right text-[#1d4a49] font-bold";
+          tdScore.textContent = entry.score;
+
+          const tdDate = document.createElement("td");
+          tdDate.className = "py-2 px-3 text-right text-[#69573c]";
+          tdDate.textContent = entry.date || "-";
+
+          tr.append(tdRank, tdName, tdScore, tdDate);
+          return tr;
+        });
+      };
+
+      if (startBody) {
+        startBody.replaceChildren(...generateRows());
+      }
+      if (resultBody) {
+        resultBody.replaceChildren(...generateRows());
+      }
+    }
+
+    function handleStartClick() {
+      const usernameInput = document.getElementById("username-input");
+      const errorMsg = document.getElementById("login-error-msg");
+      const name = usernameInput.value.trim();
+
+      if (!name) {
+        errorMsg.classList.remove("hidden");
+        usernameInput.focus();
+        return;
+      }
+
+      errorMsg.classList.add("hidden");
+      currentUsername = name;
+      localStorage.setItem("explorer_username", currentUsername);
+      beginQuiz();
+    }
+
+    document.getElementById("start-button").addEventListener("click", handleStartClick);
+    document.getElementById("hint-button").addEventListener("click", useHint);
+    document.getElementById("next-button").addEventListener("click", nextQuestion);
+    document.getElementById("replay-button").addEventListener("click", beginQuiz);
+
+    window.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+
+      // Pre-fill username from localStorage
+      const savedUsername = localStorage.getItem("explorer_username");
+      if (savedUsername) {
+        document.getElementById("username-input").value = savedUsername;
+        currentUsername = savedUsername; // set active username if pre-filled
+      }
+    });
+  </script>
+ 
+</body></html>

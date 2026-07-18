@@ -1,0 +1,13 @@
+{
+  "name": "kuis-realtime-leaderboard",
+  "version": "1.0.0",
+  "description": "Kuis Ibu Kota & Sejarah Dunia dengan Realtime Leaderboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  }
+}
